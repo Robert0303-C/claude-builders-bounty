@@ -1,0 +1,214 @@
+# Changelog
+
+## Full history
+
+_Generated on 2026-06-13T15:08:25Z — 200 commits_
+
+### Added
+- feat(i18n): add Simplified Chinese (zh-CN) translation (#13578)
+- Add Proof-of-Antiquity explainer infographic (#13959)
+- feat: add OpenAI Agents SDK RustChain tools (#13958)
+- feat(payout): canonical wallet registry (CLAIMANTS.md) — resolves #13259
+- feat(rtc-reward): fall back to GitHub handle as wallet when no RTC address (#13394)
+- feat(payout): scheduled bounty payout — pay eligible #73 reviews as wallets confirm (#13050)
+- feat: claim emoji reactions bounty #1611 (#13109)
+- feat: Claim Code Review Bounty #73 (2 PRs reviewed 2026-06-04) (#13110)
+- Add RustChain T2 balance verifier integration (#13095)
+- feat(gate): on-arrival PR-review bounty gate — #73 first-reviewer enforcement (#13046)
+- Add Beacon watchdog tutorial submission (#12450)
+- feat: Claim Awesome Lists Bounty (#2862) (#11071)
+- feat: Claim BoTTube Mini-Review Bounty (#1099) (#11059)
+- feat: Claim BoTTube Translation Bounty (#1108) (#11058)
+- feat: Claim Cross-Platform Syndication Bounty (#1157) (#11057)
+- feat: Claim BoTTube Top 10 List Bounty (#1103) (#11049)
+- feat: Claim Emoji Reactions Bounty (#1611) (#11048)
+- feat: Claim Watch 20 BoTTube Videos Bounty (#1105) (#11046)
+
+### Changed
+- docs(contributing): add security reporting section (#13563)
+- docs(i18n): add Chinese (zh-CN) translation of CONTRIBUTING.md (#13579)
+- docs: live self-updating payout counter (chain-computed hourly at rustchain.org/payouts.json)
+- docs: feature agent-economy audit paper (DOI), update Total Paid to 26,000+ RTC, fix reference rate to $0.15
+- docs: add deep dive article on Beacon agent-to-agent protocol (#13140)
+- docs: add comprehensive BoTTube review and tutorial article (#13142)
+- docs: claim code review bounty for ram-coffers PR 663 (#13074)
+- docs: add complete RustChain API reference with Python SDK (#11036)
+- docs: add comprehensive RustChain miner setup guide (#11035)
+- ci: rtc-reward is best-effort — don't fail CI on reward error
+- docs(fr): encode accented chars in shields.io URLs + fix Good First Issue label query
+- docs: replace block explorer IP with explorer.rustchain.org
+- docs: add CHANGELOG.md — policy and governance history (v0.1.0 → v0.6.0)
+
+### Fixed
+- fix(pr-review-gate): make the per-contributor cap org-wide
+- fix(langchain): close dict brace in list_bounties error path (#13944)
+- fix(pr-review-gate): stop parsing the bounty number as the claimed PR
+- fix(auto-pay): fold conservative auto-tier into single payer + per-PR idempotency
+- fix(bounty-payout): accept GitHub handle as wallet fallback (#13434)
+- fix(pr-review-gate): filter rubber-stamp reviews before first-reviewer pick (#13458)
+- fix(rtc-reward): call real /wallet/transfer contract so rewards actually send (#13275)
+- fix(ci): confirm-pending scheduler must drain fully, not 100/run (#13228)
+- fix: preserve hyphens in action input names (#13203)
+- fix(ci): hourly /pending/confirm scheduler (deliver stuck pending transfers) (#13186)
+- fix(ci): auto-pay trigger pull_request -> push (fork-PR payouts were silently failing) (#13143)
+- fix: [BOUNTY: 10 RTC] Hardware Pioneer — Mine on New Vintage Hardware (#13076)
+- fix: [BOUNTY: 15-25 RTC by variant, 200 RTC pool] Mining Hardware Video — Pro (#13087)
+- fix: [BOUNTY: 10–40 RTC by tier · 500 RTC pool] Build a RustChain Integration (#13089)
+
+### Other
+- [Bounty #3074] feat: RustChain LangChain Tool Integration (#13944)
+- security: lower bounty rates (RTC value up) + add deployment-scope policy
+- archive: land 14 stale MolhamHamwi code-review claim records
+- archive: MolhamHamwi code-review claim record (#11968)
+- archive: MolhamHamwi code-review claim record (#11974)
+- archive: MolhamHamwi code-review claim record (#11977)
+- archive: MolhamHamwi code-review claim record (#11991)
+- archive: MolhamHamwi code-review claim record (#11993)
+- archive: MolhamHamwi code-review claim record (#11997)
+- archive: MolhamHamwi code-review claim record (#11998)
+- archive: MolhamHamwi code-review claim record (#12001)
+- archive: MolhamHamwi code-review claim record (#12002)
+- archive: MolhamHamwi code-review claim record (#12005)
+- archive: MolhamHamwi code-review claim record (#12006)
+- archive: MolhamHamwi code-review claim record (#12009)
+- archive: MolhamHamwi code-review claim record (#12011)
+- archive: MolhamHamwi code-review claim record (#12015)
+- archive: MolhamHamwi code-review claim record (#12017)
+- archive: MolhamHamwi code-review claim record (#12022)
+- archive: MolhamHamwi code-review claim record (#12031)
+- archive: MolhamHamwi code-review claim record (#12033)
+- archive: MolhamHamwi code-review claim record (#12034)
+- archive: MolhamHamwi code-review claim record (#12037)
+- archive: MolhamHamwi code-review claim record (#12039)
+- archive: MolhamHamwi code-review claim record (#12042)
+- archive: MolhamHamwi code-review claim record (#12044)
+- archive: MolhamHamwi code-review claim record (#12048)
+- archive: MolhamHamwi code-review claim record (#12052)
+- archive: MolhamHamwi code-review claim record (#12124)
+- archive: MolhamHamwi code-review claim record (#12127)
+- archive: MolhamHamwi code-review claim record (#12137)
+- archive: MolhamHamwi code-review claim record (#12138)
+- archive: MolhamHamwi code-review claim record (#12142)
+- archive: MolhamHamwi code-review claim record (#12145)
+- archive: MolhamHamwi code-review claim record (#12146)
+- archive: MolhamHamwi code-review claim record (#13532)
+- archive: MolhamHamwi code-review claim record (#13538)
+- archive: MolhamHamwi code-review claim record (#12151)
+- archive: MolhamHamwi code-review claim record (#12154)
+- archive: MolhamHamwi code-review claim record (#12158)
+- archive: MolhamHamwi code-review claim record (#12164)
+- archive: MolhamHamwi code-review claim record (#12168)
+- archive: MolhamHamwi code-review claim record (#12169)
+- archive: MolhamHamwi code-review claim record (#12171)
+- archive: MolhamHamwi code-review claim record (#12172)
+- archive: MolhamHamwi code-review claim record (#12174)
+- archive: MolhamHamwi code-review claim record (#12186)
+- archive: MolhamHamwi code-review claim record (#12188)
+- archive: MolhamHamwi code-review claim record (#12190)
+- archive: MolhamHamwi code-review claim record (#12194)
+- archive: MolhamHamwi code-review claim record (#12197)
+- archive: MolhamHamwi code-review claim record (#12204)
+- archive: MolhamHamwi code-review claim record (#12209)
+- archive: MolhamHamwi code-review claim record (#12213)
+- archive: MolhamHamwi code-review claim record (#12215)
+- archive: MolhamHamwi code-review claim record (#12231)
+- archive: MolhamHamwi code-review claim record (#12233)
+- archive: MolhamHamwi code-review claim record (#12244)
+- archive: MolhamHamwi code-review claim record (#12251)
+- archive: MolhamHamwi code-review claim record (#12252)
+- archive: MolhamHamwi code-review claim record (#12254)
+- archive: MolhamHamwi code-review claim record (#12263)
+- archive: MolhamHamwi code-review claim record (#12268)
+- archive: MolhamHamwi code-review claim record (#12269)
+- archive: MolhamHamwi code-review claim record (#12271)
+- archive: MolhamHamwi code-review claim record (#12277)
+- archive: MolhamHamwi code-review claim record (#12278)
+- archive: MolhamHamwi code-review claim record (#12279)
+- archive: MolhamHamwi code-review claim record (#12280)
+- archive: MolhamHamwi code-review claim record (#12283)
+- archive: MolhamHamwi code-review claim record (#12284)
+- archive: MolhamHamwi code-review claim record (#12288)
+- archive: MolhamHamwi code-review claim record (#12289)
+- archive: MolhamHamwi code-review claim record (#12305)
+- archive: MolhamHamwi code-review claim record (#12363)
+- archive: MolhamHamwi code-review claim record (#12364)
+- archive: MolhamHamwi code-review claim record (#13542)
+- archive: MolhamHamwi code-review claim record (#13602)
+- archive: MolhamHamwi code-review claim record (#13603)
+- archive: MolhamHamwi code-review claim record (#13622)
+- archive: MolhamHamwi code-review claim record (#13623)
+- archive: MolhamHamwi code-review claim record (#13641)
+- merge: Foundation Council RFC (#12633)
+- merge: Judge Packet #4 (#12638)
+- merge: Adversarial Steelman #3 (#12635)
+- merge: accept bounty submission #13084
+- merge: accept bounty submission #13079
+- merge: accept bounty submission #13064
+- merge: accept bounty submission #12845
+- merge: accept bounty submission #12783
+- merge: accept bounty submission #12756
+- merge: accept bounty submission #12752
+- merge: accept bounty submission #12751
+- merge: accept bounty submission #12749
+- merge: accept bounty submission #12741
+- merge: accept bounty submission #12727
+- merge: accept bounty submission #12726
+- merge: accept bounty submission #12557
+- merge: accept bounty submission #12475
+- merge: accept bounty submission #12457
+- merge: accept bounty submission #12441
+- merge: accept bounty submission #12425
+- merge: accept bounty submission #12422
+- archive: claim record #12446
+- archive: claim record #12447
+- archive: claim record #12448
+- archive: claim record #12449
+- archive: claim record #12451
+- archive: claim record #12452
+- archive: claim record #12453
+- archive: claim record #12462
+- archive: claim record #12481
+- archive: claim record #12482
+- archive: claim record #12561
+- archive: claim record #12565
+- archive: claim record #12577
+- archive: claim record #12580
+- archive: claim record #12583
+- archive: claim record #12591
+- archive: claim record #12600
+- archive: claim record #12607
+- archive: claim record #12651
+- archive: claim record #12659
+- archive: claim record #12662
+- archive: claim record #12670
+- archive: claim record #12679
+- archive: claim record #12689
+- archive: claim record #12691
+- archive: claim record #12693
+- archive: claim record #12695
+- archive: claim record #12740
+- archive: claim record #12742
+- archive: claim record #12813
+- archive: claim record #12814
+- archive: claim record #12824
+- archive: claim record #12846
+- archive: claim record #12852
+- archive: claim record #12853
+- archive: claim record #12857
+- archive: claim record #12858
+- archive: claim record #12868
+- archive: claim record #12869
+- archive: claim record #12909
+- archive: claim record #12947
+- archive: claim record #12961
+- archive: claim record #13085
+- archive: claim record #13088
+- archive: claim record #13104
+- archive: claim record #13106
+- archive: claim record #13235
+- archive: claim record #13238
+- archive: claim record #13239
+- archive: claim record #13412
+- [#2864] GitHub Action: Auto-Award RTC on PR Merge (#12385)
+- Create claims/videos/arthurus36-alt.md (#10907)
+
