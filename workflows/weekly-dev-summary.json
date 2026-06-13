@@ -1,0 +1,382 @@
+{
+  "name": "Weekly GitHub Dev Summary (Claude)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "hours": 17,
+              "daysOfWeek": [
+                "Friday"
+              ]
+            }
+          ]
+        }
+      },
+      "id": "cron-trigger",
+      "name": "Weekly Cron (Fri 5pm)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "repo-assign",
+              "name": "repo",
+              "value": "={{$env.WEEKLY_REPO || 'claude-builders-bounty/claude-builders-bounty'}}",
+              "type": "string"
+            },
+            {
+              "id": "channel-assign",
+              "name": "channel",
+              "value": "={{$env.DELIVERY_CHANNEL}}",
+              "type": "string"
+            },
+            {
+              "id": "lang-assign",
+              "name": "lang",
+              "value": "={{$env.SUMMARY_LANG || 'en'}}",
+              "type": "string"
+            },
+            {
+              "id": "since-assign",
+              "name": "since",
+              "value": "={{DateTime.now().minus({days: 7}).toISO()}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "config-node",
+      "name": "Read Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.github.com/repos/{{$json.repo}}/commits?since={{$json.since}}&per_page=100",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "options": {}
+      },
+      "id": "commits-node",
+      "name": "Fetch Commits (GitHub)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        680,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.github.com/search/issues?q=repo:{{$json.repo}}+is:pr+is:merged+merged:>={{$json.since}}&per_page=50",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "options": {}
+      },
+      "id": "merged-prs-node",
+      "name": "Fetch Merged PRs (GitHub)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        680,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.github.com/search/issues?q=repo:{{$json.repo}}+is:issue+is:closed+closed:>={{$json.since}}&per_page=50",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "options": {}
+      },
+      "id": "closed-issues-node",
+      "name": "Fetch Closed Issues (GitHub)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        680,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Aggregate the three parallel fetches into a single payload\nconst items = $input.all();\nconst [commitsRes, prsRes, issuesRes] = items;\n\nconst commits = (commitsRes.json || []).map(c => ({\n  sha: c.sha?.slice(0, 7),\n  msg: c.commit?.message?.split('\\n')[0] || '',\n  author: c.author?.login || c.commit?.author?.name || 'unknown',\n  url: c.html_url,\n}));\n\nconst mergedPRs = (prsRes.json?.items || []).map(pr => ({\n  number: pr.number,\n  title: pr.title,\n  author: pr.user?.login || 'unknown',\n  url: pr.html_url,\n  body: (pr.body || '').slice(0, 400),\n}));\n\nconst closedIssues = (issuesRes.json?.items || []).map(iss => ({\n  number: iss.number,\n  title: iss.title,\n  author: iss.user?.login || 'unknown',\n  url: iss.html_url,\n}));\n\nreturn [{\n  json: {\n    repo: $('Read Config').first().json.repo,\n    channel: $('Read Config').first().json.channel,\n    lang: $('Read Config').first().json.lang,\n    since: $('Read Config').first().json.since,\n    stats: {\n      commits: commits.length,\n      mergedPRs: mergedPRs.length,\n      closedIssues: closedIssues.length,\n    },\n    commits,\n    mergedPRs,\n    closedIssues,\n  }\n}];\n"
+      },
+      "id": "aggregate-node",
+      "name": "Aggregate Activity",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        900,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{$env.ANTHROPIC_API_KEY}}"
+            },
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"claude-sonnet-4-20250514\",\n  \"max_tokens\": 1500,\n  \"messages\": [{\n    \"role\": \"user\",\n    \"content\": \"You are a developer-advocate writing the weekly summary for the {{$json.repo}} repository.\\n\\nLanguage: {{$json.lang}} (write in this language).\\n\\nActivity for the last 7 days ({{$json.since}} \u2192 now):\\n\\n## Stats\\n- {{$json.stats.commits}} commits\\n- {{$json.stats.mergedPRs}} merged PRs\\n- {{$json.stats.closedIssues}} closed issues\\n\\n## Notable commits (first 15)\\n{{$json.commits.slice(0,15).map(c => '- ' + c.sha + ' by @' + c.author + ': ' + c.msg).join('\\\\n')}}\\n\\n## Merged PRs (first 10)\\n{{$json.mergedPRs.slice(0,10).map(pr => '- #' + pr.number + ' by @' + pr.author + ': ' + pr.title).join('\\\\n')}}\\n\\n## Closed issues (first 10)\\n{{$json.closedIssues.slice(0,10).map(iss => '- #' + iss.number + ': ' + iss.title).join('\\\\n')}}\\n\\nWrite a Markdown weekly summary with these sections:\\n\\n### TL;DR (1-2 sentences)\\n### Top 3 wins (most impactful merged PRs)\\n### Themes (recurring patterns in commits/PRs)\\n### Open items (notable closed issues that may need follow-up)\\n### Looking ahead (what to focus on next week)\\n\\nKeep it under 400 words. Be specific (mention PR numbers, authors, files). No filler.\"\n  }]\n}",
+        "options": {}
+      },
+      "id": "claude-node",
+      "name": "Generate Summary (Claude)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1120,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract Claude's text from the API response\nconst r = $input.first().json;\nconst summary = (r.content || [])\n  .filter(b => b.type === 'text')\n  .map(b => b.text)\n  .join('\\n') || '(empty summary)';\nreturn [{\n  json: {\n    channel: $('Aggregate Activity').first().json.channel,\n    repo: $('Aggregate Activity').first().json.repo,\n    summary,\n    stats: $('Aggregate Activity').first().json.stats,\n  }\n}];\n"
+      },
+      "id": "extract-node",
+      "name": "Extract Summary Text",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1340,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "discord-check",
+              "leftValue": "={{$json.channel}}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith",
+                "value": "https://discord.com/api/webhooks/"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "router-node",
+      "name": "Route Delivery",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1560,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$json.channel}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"content\": null,\n  \"embeds\": [{\n    \"title\": \"Weekly Dev Summary \u2014 {{$json.repo}}\",\n    \"description\": {{ JSON.stringify($json.summary) }},\n    \"color\": 5814783,\n    \"footer\": {\n      \"text\": \"Generated by n8n + claude-sonnet-4 \u00b7 {{$json.stats.commits}} commits \u00b7 {{$json.stats.mergedPRs}} PRs \u00b7 {{$json.stats.closedIssues}} issues\"\n    }\n  }]\n}",
+        "options": {}
+      },
+      "id": "discord-node",
+      "name": "Send to Discord",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1780,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{$env.RESEND_FROM || 'noreply@example.com'}}",
+        "toEmail": "={{$json.channel}}",
+        "subject": "=Weekly Dev Summary \u2014 {{$json.repo}}",
+        "html": "=<h1>Weekly Dev Summary \u2014 {{$json.repo}}</h1><pre style=\"font-family: ui-monospace, monospace; white-space: pre-wrap;\">{{$json.summary}}</pre><hr><p style=\"color: #888; font-size: 12px;\">{{$json.stats.commits}} commits \u00b7 {{$json.stats.mergedPRs}} PRs \u00b7 {{$json.stats.closedIssues}} issues</p>",
+        "options": {}
+      },
+      "id": "email-node",
+      "name": "Send via Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1780,
+        460
+      ]
+    }
+  ],
+  "connections": {
+    "Weekly Cron (Fri 5pm)": {
+      "main": [
+        [
+          {
+            "node": "Read Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Config": {
+      "main": [
+        [
+          {
+            "node": "Fetch Commits (GitHub)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fetch Merged PRs (GitHub)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fetch Closed Issues (GitHub)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Commits (GitHub)": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Activity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Merged PRs (GitHub)": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Activity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Closed Issues (GitHub)": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Activity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Activity": {
+      "main": [
+        [
+          {
+            "node": "Generate Summary (Claude)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Summary (Claude)": {
+      "main": [
+        [
+          {
+            "node": "Extract Summary Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Summary Text": {
+      "main": [
+        [
+          {
+            "node": "Route Delivery",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Delivery": {
+      "main": [
+        [
+          {
+            "node": "Send to Discord",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send via Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "id": "weekly-github-dev-summary",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}
